@@ -1,0 +1,7 @@
+{
+  "name": "WEG Metrology Management System",
+  "description": "A comprehensive metrology web application for managing instrument lifecycles, calibrations, work orders, and non-conformities, fully compliant with industrial standards.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
