@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Metrológico</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+body { background:#f8fafc; }
+</style>
+</head>
+<body class="p-6">
+
+<div class="space-y-8 pb-10">
+
+<!-- HEADER -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">Dashboard Metrológico</h1>
+    <p class="text-slate-500 text-sm">Visão consolidada da planta Jaraguá do Sul • Unidade WMO</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-sm">
+      <i data-lucide="filter" class="text-blue-500 w-4"></i>
+      <select id="workCenterFilter" class="text-xs font-bold text-slate-600 bg-transparent focus:outline-none">
+        <option value="all">Todos Centros de Trabalho</option>
+        <option value="usinagem">Usinagem A</option>
+        <option value="manutencao">Manutenção</option>
+        <option value="qualidade">Qualidade</option>
+      </select>
+    </div>
+    <button class="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-blue-600 shadow-sm">
+      <i data-lucide="calendar" class="w-5"></i>
+    </button>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-blue-600 shadow-lg">
+        <i data-lucide="ruler"></i>
+      </div>
+    </div>
+    <h3 id="totalInstruments" class="text-2xl font-black text-slate-800">0</h3>
+    <p class="text-[10px] font-black text-slate-400 uppercase">Instrumentos</p>
+    <div class="mt-4 pt-4 border-t border-slate-100">
+      <p class="text-[10px] font-bold text-slate-500 uppercase">Total em inventário</p>
+    </div>
+  </div>
+
+  <div id="ncCard" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-rose-500 shadow-lg">
+        <i data-lucide="alert-triangle"></i>
+      </div>
+    </div>
+    <h3 id="ncPercentage" class="text-2xl font-black text-slate-800">0%</h3>
+    <p class="text-[10px] font-black text-slate-400 uppercase">Taxa Não Conformidade</p>
+    <div class="mt-4 pt-4 border-t border-slate-100">
+      <p id="ncCount" class="text-[10px] font-bold text-slate-500 uppercase">0 instrumentos NC</p>
+    </div>
+  </div>
+
+  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-blue-800 shadow-lg">
+        <i data-lucide="briefcase"></i>
+      </div>
+    </div>
+    <h3 class="text-2xl font-black text-slate-800">12</h3>
+    <p class="text-[10px] font-black text-slate-400 uppercase">Ordens em Aberto</p>
+    <div class="mt-4 pt-4 border-t border-slate-100">
+      <p class="text-[10px] font-bold text-slate-500 uppercase">Total geral pendente</p>
+    </div>
+  </div>
+
+  <!-- SERVIÇOS EXTERNOS (com bloco removido) -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-slate-900 shadow-lg">
+        <i data-lucide="external-link"></i>
+      </div>
+      <span class="text-[9px] font-black text-slate-400 uppercase">Serviços Externos</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 text-xs">
+      <div class="flex justify-between"><span>No prazo</span><span class="font-black text-emerald-600">08</span></div>
+      <div class="flex justify-between"><span>Atrasado</span><span class="font-black text-rose-600">02</span></div>
+      <div class="flex justify-between"><span>Análise</span><span class="font-black text-amber-600">01</span></div>
+      <div class="flex justify-between"><span>Concluído</span><span class="font-black text-blue-600">01</span></div>
+    </div>
+
+    <!-- bloco removido: Lead Time / Retrabalho / NC Serv -->
+
+  </div>
+
+  <!-- CRONOGRAMA -->
+  <div class="bg-white p-5 rounded-2xl border border-emerald-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-emerald-600 shadow-lg">
+        <i data-lucide="target"></i>
+      </div>
+      <span id="schedulePercentage" class="text-xl font-black text-emerald-600">0%</span>
+    </div>
+    <div class="text-xs space-y-1">
+      <div class="flex justify-between"><span>Realizado:</span><span id="realizadas" class="font-black text-emerald-700">0</span></div>
+      <div class="flex justify-between"><span>Planejado:</span><span id="previstas" class="font-black">0</span></div>
+      <div class="flex justify-between border-t pt-1 text-rose-600">
+        <span>Faltante:</span><span id="faltante" class="font-black">0</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- GRÁFICOS -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+  <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2 mb-4">
+      <i data-lucide="activity" class="text-blue-500"></i>
+      Execução Mensal vs Previsto
+    </h3>
+    <canvas id="barChart" height="120"></canvas>
+  </div>
+
+  <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2 mb-4">
+      <i data-lucide="calendar" class="text-amber-500"></i>
+      Previsto por Dia
+    </h3>
+    <canvas id="areaChart" height="120"></canvas>
+  </div>
+
+</div>
+
+<!-- EVOLUÇÃO -->
+<div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+  <div class="flex justify-between mb-4">
+    <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2">
+      <i data-lucide="trending-up" class="text-emerald-500"></i>
+      Evolução do Parque de Instrumentos
+    </h3>
+    <div class="flex bg-slate-100 p-1 rounded-lg">
+      <button id="btnAnnual" class="px-3 py-1 text-[10px] font-black bg-white shadow text-blue-600 rounded-md">Anual</button>
+      <button id="btnMonthly" class="px-3 py-1 text-[10px] font-black text-slate-500 rounded-md">Mensal</button>
+    </div>
+  </div>
+  <canvas id="lineChart" height="100"></canvas>
+</div>
+
+<!-- TABELA OS -->
+<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+  <div class="p-6 border-b flex justify-between">
+    <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2">
+      <i data-lucide="clipboard-list" class="text-blue-500"></i>
+      Ordens em Aberto
+    </h3>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 border-b">
+      <tr>
+        <th class="px-4 py-2">OS</th>
+        <th class="px-4 py-2">Instrumento</th>
+        <th class="px-4 py-2">Responsável</th>
+        <th class="px-4 py-2">Prazo</th>
+        <th class="px-4 py-2">Status</th>
+      </tr>
+    </thead>
+    <tbody id="osTable"></tbody>
+  </table>
+</div>
+
+</div>
+
+<script>
+// ===== MOCK DATA (igual React) =====
+const instruments = [
+  { name:"Paquímetro", nonConforming:false },
+  { name:"Micrômetro", nonConforming:true },
+  { name:"Multímetro", nonConforming:false },
+  { name:"Relógio Comparador", nonConforming:true },
+  { name:"Manômetro", nonConforming:false },
+];
+
+const monthlyTrendData = [
+  { month:'Jan', realizadas:45, previstas:48 },
+  { month:'Fev', realizadas:52, previstas:50 },
+  { month:'Mar', realizadas:48, previstas:55 },
+  { month:'Abr', realizadas:61, previstas:60 },
+  { month:'Mai', realizadas:35, previstas:42 },
+];
+
+const dailyPlannedData = [
+  { day:1,qtd:2 },{ day:3,qtd:5 },{ day:5,qtd:3 },{ day:8,qtd:8 },
+  { day:10,qtd:4 },{ day:15,qtd:12 },{ day:20,qtd:6 },{ day:25,qtd:3 }
+];
+
+const annualData = [
+  { period:'2020', total:850 },
+  { period:'2021', total:920 },
+  { period:'2022', total:980 },
+  { period:'2023', total:1020 },
+  { period:'2024', total:1052 },
+];
+
+const monthlyData = [
+  { period:'Jan', total:1020 },
+  { period:'Fev', total:1035 },
+  { period:'Mar', total:1042 },
+  { period:'Abr', total:1050 },
+  { period:'Mai', total:1052 },
+];
+
+const workOrders = [
+  { id:"OS-8891", name:"Micrômetro", tech:"Ricardo", date:"2024-05-22", status:"Em andamento" },
+  { id:"OS-8892", name:"Multímetro", tech:"Ana Paula", date:"2024-05-20", status:"Aberta" },
+  { id:"OS-8895", name:"Relógio Comparador", tech:"João Silva", date:"2024-05-25", status:"Aberta" },
+];
+
+// ===== KPIs =====
+const total = instruments.length;
+const nc = instruments.filter(i=>i.nonConforming).length;
+const ncPercent = ((nc/total)*100).toFixed(1);
+
+document.getElementById("totalInstruments").innerText = total;
+document.getElementById("ncPercentage").innerText = ncPercent+"%";
+document.getElementById("ncCount").innerText = nc+" instrumentos NC";
+
+// Cronograma (Maio)
+const current = monthlyTrendData[4];
+const schedule = ((current.realizadas/current.previstas)*100).toFixed(1);
+document.getElementById("schedulePercentage").innerText = schedule+"%";
+document.getElementById("realizadas").innerText = current.realizadas;
+document.getElementById("previstas").innerText = current.previstas;
+document.getElementById("faltante").innerText = current.previstas-current.realizadas;
+
+// ===== BAR CHART =====
+new Chart(document.getElementById("barChart"), {
+  type:"bar",
+  data:{
+    labels: monthlyTrendData.map(d=>d.month),
+    datasets:[
+      { label:"Previstas", data:monthlyTrendData.map(d=>d.previstas), backgroundColor:"#e2e8f0" },
+      { label:"Realizadas", data:monthlyTrendData.map(d=>d.realizadas), backgroundColor:"#2563eb" }
+    ]
+  }
+});
+
+// ===== AREA CHART =====
+new Chart(document.getElementById("areaChart"), {
+  type:"line",
+  data:{
+    labels: dailyPlannedData.map(d=>d.day),
+    datasets:[
+      { label:"Qtd", data:dailyPlannedData.map(d=>d.qtd), borderColor:"#f59e0b", backgroundColor:"rgba(245,158,11,0.2)", fill:true }
+    ]
+  }
+});
+
+// ===== LINE CHART (TOGGLE) =====
+let currentChart;
+function renderLine(data){
+  if(currentChart) currentChart.destroy();
+  currentChart = new Chart(document.getElementById("lineChart"), {
+    type:"line",
+    data:{
+      labels:data.map(d=>d.period),
+      datasets:[{ label:"Total", data:data.map(d=>d.total), borderColor:"#2563eb", tension:0.3 }]
+    }
+  });
+}
+renderLine(annualData);
+
+document.getElementById("btnAnnual").onclick = ()=>renderLine(annualData);
+document.getElementById("btnMonthly").onclick = ()=>renderLine(monthlyData);
+
+// ===== TABLE =====
+const tbody = document.getElementById("osTable");
+workOrders.forEach(os=>{
+  tbody.innerHTML += `
+    <tr class="border-b hover:bg-slate-50">
+      <td class="px-4 py-2 font-bold">${os.id}</td>
+      <td class="px-4 py-2">${os.name}</td>
+      <td class="px-4 py-2">${os.tech}</td>
+      <td class="px-4 py-2">${os.date}</td>
+      <td class="px-4 py-2 text-blue-600 font-bold">${os.status}</td>
+    </tr>
+  `;
+});
+
+// icons
+lucide.createIcons();
+</script>
+
+</body>
+</html>
